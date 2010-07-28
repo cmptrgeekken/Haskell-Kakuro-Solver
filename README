@@ -1,0 +1,67 @@
+Author:
+	Kenneth Beck
+
+The Kakuro solver is divided into two sections. The first section, Kakuro.lhs, 
+provides the backtracking algorithm used for solving a Kakuro puzzle. There are
+four functions:
+
+choices - Produces a list of valid moves for the next element in the Kakuro grid
+choose  - Selects the provided move and returns a new board with the selection
+          made
+solved  - Returns true if there are no more moves to be made on the board
+solve   - Runs the solving algorithm on a board, and returns the solution
+          or an empty list if no solutions exist.
+		  
+The other section is KakuroHelper. This contains all the helper functions
+used for the Kakuro solver. It also contains several sample Sudoku grids
+that can be used to test the algorithm. To run the solver over a grid,
+pass the grid into the solve function:
+
+solve sample5x51
+
+--------------------------------------------------------------------------------
+To help with visualising the Kakuro grid, I've provided an html file that can
+both accept the Haskell representation of the grid and generate a new grid that
+can be passed back into the Haskell solver. 
+
+After launching Kakuro.htm in a web browser, you are presented with a simple
+interface. Across the top are three buttons:
+
+Clear Grid   - Clears the current grid, converting all cells to Empty cells.
+Clear Values - Removes all values from non-helper cells.
+Get/Paste Grid String - Presents a prompt that displays the Haskell string
+	representation for the current grid. This can be copied and then run
+	against the Kakuro solver. Or, a grid generated from the solver can be
+	pasted into the prompt and the HTML page will update its grid to represent
+	the Haskell one.
+
+The second row contains dropdowns for manipulating the layout of the grid. The
+first dropdown contains the values 4 through 15, and allows a user to generate
+a square grid of any dimension between those values. The second dropdown 
+determines the on-click behavior of the cells:
+
+Change Cell Type - clicking on a cell toggles between the three cell types:
+   - Empty cell, represented by a solid-grey box
+   - Helper cell, represented by a grey box with a diagonal-black line
+   - Normal cell, represented by a solid-white box
+   NOTE: Changing a cell type will remove all values the cell may contain
+   
+Change Cell Value - for helper and normal cells, provides a prompt that allows
+	the user to change the values of the cell.
+	For normal cells, the user selects one number to represent the value of that
+	cell.
+	
+	For helper cells, the user first selects the sum to be displayed in the
+	horizontal direction (or 0 if no sum should be displayed) and then selects
+	the sum to be displayed in the vertical direction (or 0 if no sum should
+	be displayed).
+	
+A couple notes:
+The web page does not save state. If the page is refreshed for whatever reason
+the board will be cleared. Thus, it's a good idea to keep a copy of your 
+grid string whenever possible.
+
+The board does some basic error checking for the input string (verifying that
+the string is valid solver-input), but beyond that, it does not determine if
+moves are valid or if a grid is actually solved. It is used for generating
+grids and displaying solutions, nothing more.

@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>Kakuro</title>
+<style type="text/css">
+	.theGrid { cursor: pointer; padding: 0; border-collapse: collapse;  }
+	.theGrid td.top { width: 33px; height: 33px; border: 1px solid #000; text-align: center; font-size: 18px; font-weight:bold; }
+	.theGrid .helper { padding: 0;border: 0px solid #000; background: url(cross.jpg) no-repeat; width: 100%; height: 100%; border-collapse: collapse; }
+	.theGrid .helper td { border: 0; padding: 0;width: 50%; height: 50%; font-size: 12px;}
+	.theGrid td.empty { background-color: #CCC; }
+</style>
+<script type="text/javascript">
+	var size = 6;
+	var grid = new Array();
+	grid_size(size);
+	
+	function gen_grid_string(){
+		var str = "[";
+		for(var i=0;i<grid.length;i++){
+			if( i > 0 )
+				str+=",";
+			str += "("+grid[i].join(",")+")";
+		}
+		str += "]";
+		
+		return str;
+	}
+	
+	function input_grid(){
+		var input = prompt("Grid String:\n\n[(<value>,<horiz-sum>,<vert-sum>),...]",gen_grid_string());
+		if( !input ) return;
+		input = input.replace(/\(/g,'[').replace(/\)/g,']')
+		try {
+			newGrid = eval(input);
+			if(isValidGrid(newGrid)){
+				grid = newGrid;
+				gen_grid();
+			}
+		}catch(e){alert("Invalid Grid: " + e);}
+	}
+	
+	function isValidGrid(grid){
+		if( !grid.length ) throw "Grid not an array.";
+		for( var i=0;i<grid.length;i++ ){
+			if( !grid[i].length || grid[i].length != 3 ) throw "Some grid elements not properly formatted.";
+			for( var j=0;j<grid[i].length;j++ ){
+				if( isNaN( grid[i][j] ) ) throw "Some grid elements not numbers.";
+				
+			}
+		}
+		
+		return true;
+	}
+	
+	function gen_grid(){
+		if( !grid ) return;
+		var rows = Math.sqrt(grid.length);
+		var tbl = document.getElementById('theGrid');
+		var txt = "";
+		for( var i=0;i<rows;i++ ){
+			txt += "<table class='theGrid' align='center'><tr>";
+			for( var j=0;j<rows;j++){
+				var elem = grid[j+i*rows];
+				txt += "<td id='elem_"+(j+i*rows)+"' onclick='mod_grid(this.id)' class='top"+(elem[0]==-2?" empty":"")+"'>";
+				if( elem[0] == -1 ){
+					txt += '<table class="helper"><tr><td>&nbsp;</td>';
+					txt += '<td align="">'+(elem[1] > 0?elem[1]:'&nbsp;')+'</td></tr>';
+					txt += '<tr><td align="">'+(elem[2] > 0?elem[2]:'&nbsp;')+'</td>';
+					txt += '<td>&nbsp;</td></tr></table>';
+				}else if(elem[0] > 0){
+					txt += elem[0];
+				}else{
+					txt += "&nbsp;";
+				}
+				txt += "</td>";
+			}
+			txt += "</tr></table>";
+		}
+		if( tbl ){
+			tbl.innerHTML = txt;
+			size = rows;
+			document.getElementById('gridSize').value = size;
+			
+		}
+		
+	}
+	
+	function mod_grid(id,edit){
+		var elemNum = id.replace(/elem_/,'');
+		var elem = grid[elemNum];
+		var meth = document.getElementById('method').value;
+		if( meth == 'v' || edit ){
+			if( elem[0] == -1 ){
+				var r = prompt("New Row Value: ", elem[1]);
+				var c = prompt("New Column Value: ", elem[2]);
+				if( r ) grid[elemNum][1] = r;
+				if( c ) grid[elemNum][2] = c;
+			}else if( elem[0] >= 0 ){
+				var v = prompt("New Value: ", elem[0]);
+				if( !v ) v = 0;
+				grid[elemNum][0] = v; 
+			}
+		}else if(meth == 't'){
+			var c = 0;
+			switch( elem[0] ){
+				case -2:
+					c = -1;
+					break;
+				case -1:
+					c = 0;
+					break;
+				default:
+					c = -2;
+			}
+			
+			grid[elemNum] = [c,0,0];
+		}
+		
+		gen_grid();
+	}
+	
+	function clear_values(){
+		for(var i=0;i<grid.length;i++){
+			if( grid[i][0] > 0 )
+				grid[i][0] = 0;
+		}
+		
+		gen_grid();
+	}
+	
+	function clear_grid(){
+		for(var i=0;i<grid.length;i++)
+			grid[i] = [-2,0,0];
+		gen_grid();
+	}
+	
+	function grid_size(newSize){
+		if( !newSize ) newSize = size;
+		var newGrid = new Array();
+		var oldSize = size;
+		for(var i=0;i<newSize;i++){
+			for(var j=0;j<newSize;j++){
+				var id  = j+newSize*i;
+				var id2 = j+oldSize*i;
+				if( j < oldSize && grid.length > id2 )
+					newGrid[id] = grid[id2];
+				else
+					newGrid[id] = [-2,0,0];
+			}
+		}
+		
+		grid = newGrid;
+		size = newSize;
+		gen_grid();
+	}
+</script>
+</head>
+<body onload="document.forms['input'].reset();grid_size()">
+<div style="width: 800px;margin: 0 auto;text-align:center;">
+	<form name="input" align="center" style="margin: 0 auto;width: 75%;">
+	<input type="button" value="Clear Grid" onclick="clear_grid()" />
+	<input type="button" value="Clear Values" onclick="clear_values()" />
+	<input type="button" value="Get/Paste Grid String" onclick="input_grid()" />
+	<br /><br />
+
+	Grid Size:
+	<select id="gridSize" onchange="grid_size(this.value)">
+		<option value="4">4</option>
+		<option value="5">5</option>
+		<option value="6" selected="selected">6</option>
+		<option value="7">7</option>
+		<option value="8">8</option>
+		<option value="9">9</option>
+		<option value="10">10</option>
+		<option value="11">11</option>
+		<option value="12">12</option>
+		<option value="13">13</option>
+		<option value="14">14</option>
+		<option value="15">15</option>
+	</select>
+
+	&nbsp; &nbsp;
+	Modification Method
+	<select id="method">
+		<option value="t">Change Cell Type</option>
+		<option value="v">Change Cell Value</option>
+	</select>
+	</form>
+	<br />
+	<div id="theGrid" align="center">&nbsp;</div>
+</div>
+</body>
+</html>
